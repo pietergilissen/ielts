@@ -158,7 +158,43 @@
   }
 
   var tasks = {
-    t1a: {min:150, html:`<h3>Task 1A — Line graph</h3><p>The line graph shows the percentage of households in three countries that had access to the internet between 2005 and 2020.</p><p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>`},
+    t1a: {min:150, html:\`<h3>Task 1A — Line graph</h3>
+<p>The line graph shows the percentage of households in three countries that had access to the internet between 2005 and 2020.</p>
+<svg viewBox="0 0 720 390" role="img" aria-label="Line graph showing internet access in three countries from 2005 to 2020">
+  <line x1="75" y1="320" x2="680" y2="320" stroke="currentColor"/>
+  <line x1="75" y1="40" x2="75" y2="320" stroke="currentColor"/>
+  <g stroke="currentColor" opacity=".15">
+    <line x1="75" y1="264" x2="680" y2="264"/>
+    <line x1="75" y1="208" x2="680" y2="208"/>
+    <line x1="75" y1="152" x2="680" y2="152"/>
+    <line x1="75" y1="96" x2="680" y2="96"/>
+    <line x1="75" y1="40" x2="680" y2="40"/>
+  </g>
+  <g font-size="13" fill="currentColor">
+    <text x="43" y="325">0</text><text x="36" y="269">20</text>
+    <text x="36" y="213">40</text><text x="36" y="157">60</text>
+    <text x="36" y="101">80</text><text x="30" y="45">100</text>
+    <text x="65" y="345">2005</text><text x="165" y="345">2008</text>
+    <text x="275" y="345">2011</text><text x="385" y="345">2014</text>
+    <text x="495" y="345">2017</text><text x="610" y="345">2020</text>
+    <text x="300" y="378">Year</text>
+    <text x="18" y="190" transform="rotate(-90 18 190)">Households (%)</text>
+  </g>
+  <polyline points="75,253 185,214 295,169 405,124 515,85 625,60" fill="none" stroke="currentColor" stroke-width="4"/>
+  <polyline points="75,281 185,258 295,225 405,186 515,146 625,113" fill="none" stroke="currentColor" opacity=".65" stroke-width="4"/>
+  <polyline points="75,298 185,286 295,264 405,242 515,208 625,169" fill="none" stroke="currentColor" opacity=".35" stroke-width="4"/>
+  <g fill="currentColor">
+    <circle cx="75" cy="253" r="4"/><circle cx="185" cy="214" r="4"/><circle cx="295" cy="169" r="4"/><circle cx="405" cy="124" r="4"/><circle cx="515" cy="85" r="4"/><circle cx="625" cy="60" r="4"/>
+    <circle cx="75" cy="281" r="4"/><circle cx="185" cy="258" r="4"/><circle cx="295" cy="225" r="4"/><circle cx="405" cy="186" r="4"/><circle cx="515" cy="146" r="4"/><circle cx="625" cy="113" r="4"/>
+    <circle cx="75" cy="298" r="4"/><circle cx="185" cy="286" r="4"/><circle cx="295" cy="264" r="4"/><circle cx="405" cy="242" r="4"/><circle cx="515" cy="208" r="4"/><circle cx="625" cy="169" r="4"/>
+  </g>
+  <g font-size="13" fill="currentColor">
+    <text x="480" y="25">━━ Country A</text>
+    <text x="480" y="47" opacity=".65">━━ Country B</text>
+    <text x="480" y="69" opacity=".35">━━ Country C</text>
+  </g>
+</svg>
+<p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>,
     t1b: {min:150, html:`
 <h3>Task 1B — Bar chart</h3>
 <p>The bar chart shows the average number of hours per week that adults in four age groups spent on exercise, watching television and using social media.</p>
@@ -188,7 +224,29 @@
 </svg>
 <p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>
 `},
-    t1c: {min:150, html:`<h3>Task 1C — Process diagram</h3><p>The diagram shows the stages involved in producing drinking water from seawater using a desalination plant.</p><p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features.</p>`},
+    t1c: {min:150, html:\`<h3>Task 1C — Process diagram</h3>
+<p>The diagram shows the stages involved in producing drinking water from seawater using a desalination plant.</p>
+<svg viewBox="0 0 720 250" role="img" aria-label="Desalination process diagram">
+  <g fill="none" stroke="currentColor" stroke-width="2">
+    <rect x="20" y="85" width="120" height="70" rx="8"/>
+    <rect x="205" y="85" width="120" height="70" rx="8"/>
+    <rect x="390" y="85" width="120" height="70" rx="8"/>
+    <rect x="575" y="85" width="120" height="70" rx="8"/>
+    <path d="M140 120 H195"/><path d="M325 120 H380"/><path d="M510 120 H565"/>
+  </g>
+  <g fill="currentColor">
+    <path d="M195 120 l-10 -6 v12 z"/>
+    <path d="M380 120 l-10 -6 v12 z"/>
+    <path d="M565 120 l-10 -6 v12 z"/>
+  </g>
+  <g font-size="14" fill="currentColor" text-anchor="middle">
+    <text x="80" y="113">1. Seawater</text><text x="80" y="133">intake &amp;</text><text x="80" y="151">pre-treatment</text>
+    <text x="265" y="113">2. High-pressure</text><text x="265" y="133">reverse</text><text x="265" y="151">osmosis</text>
+    <text x="450" y="113">3. Minerals</text><text x="450" y="133">added &amp;</text><text x="450" y="151">disinfection</text>
+    <text x="635" y="123">4. Storage &amp;</text><text x="635" y="143">distribution</text>
+  </g>
+</svg>
+<p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features.</p>,
     t2a: {min:250, html:`<h3>Task 2A — Technology and employment</h3><p>Artificial intelligence and automation are expected to change the types of jobs available in the future.</p><p>Some people believe governments should provide financial support to people whose jobs disappear because of technology. Others believe individuals should be responsible for adapting to these changes.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`},
     t2b: {min:250, html:`<h3>Task 2B — Education</h3><p>Some people believe that schools should focus mainly on academic subjects, while others think that practical skills such as financial management, communication and cooking are equally important.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`},
     t2c: {min:250, html:`<h3>Task 2C — Remote work</h3><p>Working from home has become increasingly common. Some people believe this is beneficial for employees and employers, while others think it has more disadvantages than advantages.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`},
