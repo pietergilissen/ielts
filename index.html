@@ -41,6 +41,18 @@
 .grade-button{font-weight:700}
 .grading-result{margin-top:12px;padding:14px;border:1px solid #ddd;border-radius:10px;background:#fff}
 .grade-score{font-size:1.35rem;font-weight:700;margin-bottom:8px}
+
+.grading-area{margin-top:18px;padding-top:16px;border-top:1px solid #ddd}
+.grading-area label{display:block;font-weight:600;margin:8px 0 5px}
+.grading-area input[type="password"]{width:100%;box-sizing:border-box;padding:11px;border:1px solid #bbb;border-radius:8px;font-size:15px}
+.key-save{font-weight:400!important;font-size:13px}
+.grade-button{font-weight:700;margin-top:8px}
+.grading-result{margin-top:14px;padding:16px;border:1px solid #ddd;border-radius:10px;background:#fff}
+.grading-result h4{margin:0 0 8px}
+.grading-result table{border-collapse:collapse;width:100%;margin:10px 0}
+.grading-result th,.grading-result td{border:1px solid #ddd;padding:7px;text-align:left}
+.grading-result ul{margin-top:6px}
+.ai-score{font-size:1.45rem;font-weight:700}
 </style>
 </head>
 <body>
@@ -141,11 +153,15 @@
       <button type="button" class="secondary" id="reset">Reset</button>
     </div>
     <div class="grading-area">
-      <button type="button" id="gradeAnswer" class="grade-button">Grade my answer</button>
-      <p class="small">Practice estimate based on IELTS-style checks. It is not an official IELTS score.</p>
+      <h3>AI IELTS examiner</h3>
+      <p class="small">Uses the OpenAI API to assess the answer against the IELTS Writing criteria. The API key is used only in this browser session and is not included in this HTML file.</p>
+      <label for="apiKey">OpenAI API key</label>
+      <input id="apiKey" type="password" autocomplete="off" placeholder="Paste your API key here">
+      <label class="key-save"><input type="checkbox" id="rememberKey"> Remember on this device</label>
+      <button type="button" id="gradeAnswer" class="grade-button">Grade with AI</button>
       <div id="gradingResult" class="grading-result" aria-live="polite" hidden></div>
     </div>
-  </section>
+</section>
 </div>
 </div>
 </div>
@@ -259,75 +275,138 @@
   }
 })();
 
-function gradeAnswer() {
+
+async function gradeAnswer() {
   const box = document.getElementById("essay");
   const result = document.getElementById("gradingResult");
-  const text = box.value.trim();
-  const min = Number(document.getElementById("minimum").textContent);
+  const keyBox = document.getElementById("apiKey");
+  const remember = document.getElementById("rememberKey");
   const taskId = document.getElementById("taskSelect").value;
+  const task = tasks[taskId];
+  const answer = box.value.trim();
 
-  if (!text) {
+  if (!answer) {
     result.hidden = false;
     result.innerHTML = "<h4>Nothing to grade yet</h4><p>Write your answer first.</p>";
     return;
   }
 
-  const words = text.split(/\s+/).filter(Boolean).length;
-  const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
-  const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
-  const lower = text.toLowerCase();
+  const apiKey = keyBox.value.trim();
+  if (!apiKey) {
+    result.hidden = false;
+    result.innerHTML = "<h4>API key required</h4><p>Paste your OpenAI API key above, then tap <strong>Grade with AI</strong>.</p>";
+    return;
+  }
 
-  const linking = (lower.match(/\b(overall|however|whereas|while|although|in contrast|similarly|on the other hand|therefore|as a result|in addition|moreover|firstly|secondly)\b/g) || []).length;
-  const comparisons = (lower.match(/\b(higher|lower|increase|increased|decrease|decreased|rose|fell|compared|respectively|percentage points|more than|less than|similar|difference)\b/g) || []).length;
-  const dataWords = (lower.match(/\b\d+(?:\.\d+)?%?\b/g) || []).length;
-  const longSentences = sentences.filter(s => s.split(/\s+/).length > 30).length;
+  if (remember.checked) localStorage.setItem("ielts_openai_key", apiKey);
+  else localStorage.removeItem("ielts_openai_key");
 
-  let score = 5.0;
-  const strengths = [];
-  const improvements = [];
+  const taskContext = {
+    t1a: "Task 1 line graph. Data: Country A approximately 25% in 2005, then about 38%, 54%, 70%, 84%, and 95% in 2020; Country B approximately 15%, 22%, 34%, 48%, 62%, and 74%; Country C approximately 8%, 12%, 20%, 28%, 40%, and 55%. Main trend: all rise; A remains highest; C remains lowest.",
+    t1b: "Task 1 bar chart. Average hours per week by age group (18-29, 30-44, 45-59, 60+): Exercise approximately 8, 7, 6, 9 hours; TV approximately 18.5, 17.5, 16.5, 14.5 hours; Social media approximately 13.5, 10.5, 7.5, 4 hours.",
+    t1c: "Task 1 process diagram. Desalination: seawater intake and pre-treatment -> high-pressure reverse osmosis -> minerals added and disinfection -> storage and distribution.",
+    t2a: "Task 2 essay about whether governments or individuals should bear responsibility for workers displaced by AI and automation.",
+    t2b: "Task 2 essay about whether schools should focus on academic subjects or also teach practical skills such as financial management and cooking.",
+    t2c: "Task 2 essay about advantages and disadvantages of working from home.",
+    t2d: "Task 2 essay about whether environmental problems should be addressed by individuals or governments and large companies.",
+    t2e: "Task 2 opinion essay about spending more government money on public transport rather than new roads.",
+    t2f: "Task 2 essay about whether parents should strictly control children's screen time or children should learn to manage it themselves."
+  }[taskId] || "";
 
-  if (words >= min) { score += .45; strengths.push("You reached the minimum word count."); }
-  else improvements.push("Reach at least " + min + " words.");
+  const prompt = `
+You are a strict IELTS Academic Writing examiner. Assess the candidate response below using the official IELTS Writing assessment concepts: Task Achievement/Task Response, Coherence and Cohesion, Lexical Resource, and Grammatical Range and Accuracy.
 
-  if (paragraphs >= 3) { score += .25; strengths.push("The response is divided into paragraphs."); }
-  else improvements.push("Use clear paragraphs with a logical progression.");
+This is practice, not an official score. Be realistic and conservative. A response should not receive Band 7 merely because it is understandable. Distinguish carefully between 6.0, 6.5 and 7.0.
 
-  if (linking >= 3) { score += .25; strengths.push("You use several linking expressions."); }
-  else improvements.push("Use a wider range of natural linking and comparison expressions.");
+For Task 1, check whether the overview identifies the main features and whether figures/trends/comparisons are accurate. For Task 2, check whether all parts of the question are answered, the position is clear, and ideas are sufficiently developed.
 
-  if (comparisons >= 4) { score += .25; strengths.push("You use useful comparison/trend vocabulary."); }
-  else improvements.push("Make more direct comparisons between the key points.");
+Identify actual language errors and explain them. Do not invent errors. Pay particular attention to articles, prepositions, subject-verb agreement, verb tense, plurals, word forms, collocations, punctuation and spelling.
 
-  if (taskId.startsWith("t1") && dataWords >= 4) { score += .25; strengths.push("You report several figures from the visual."); }
-  if (taskId.startsWith("t1") && dataWords < 4) improvements.push("Support your overview with more specific figures from the visual.");
+Return ONLY valid JSON with this exact structure:
+{
+  "overall": 6.5,
+  "task": 7.0,
+  "coherence": 6.5,
+  "lexical": 6.0,
+  "grammar": 6.0,
+  "summary": "brief explanation",
+  "strengths": ["...", "..."],
+  "priorities": ["...", "...", "..."],
+  "corrections": [
+    {"original":"...", "better":"...", "reason":"..."}
+  ],
+  "band7": "specific explanation of what must change to reach Band 7"
+}
 
-  if (longSentences >= Math.max(2, Math.floor(sentences.length / 3)))
-    improvements.push("Some sentences are very long; split them to improve clarity and grammatical control.");
+Use half bands only (5.0, 5.5, 6.0, 6.5, 7.0, etc.). The overall should be a plausible IELTS Writing score, not an arithmetic average forced to the nearest half band.
 
-  score = Math.min(7, Math.max(4, Math.round(score * 2) / 2));
+TASK:
+${taskContext}
 
-  const note = score >= 7
-    ? "These checks suggest potential Band 7 level, but detailed language accuracy still needs examiner-style assessment."
-    : score >= 6.5
-    ? "This is around Band 6.5 on these checks. Precision and grammatical accuracy are the main route to Band 7."
-    : score >= 6
-    ? "This is around Band 6 on these checks. Focus on accuracy, development and precise comparisons."
-    : "Focus first on task completion, structure and accurate language.";
+CANDIDATE RESPONSE:
+${answer}
+`;
 
   result.hidden = false;
-  result.innerHTML =
-    '<div class="grade-score">Practice estimate: Band ' + score.toFixed(1) + '</div>' +
-    '<p>' + note + '</p>' +
-    '<p><strong>Strengths</strong></p><ul>' +
-    (strengths.length ? strengths.map(x => '<li>' + x + '</li>').join("") : '<li>Keep developing the response.</li>') +
-    '</ul><p><strong>Priorities</strong></p><ul>' +
-    (improvements.length ? improvements.map(x => '<li>' + x + '</li>').join("") : '<li>Continue refining precision and natural expression.</li>') +
-    '</ul>' +
-    '<p class="small"><strong>Important:</strong> this is a rule-based practice estimate, not an AI examiner or official IELTS assessment.</p>';
+  result.innerHTML = "<p><strong>Grading...</strong> The AI examiner is assessing the response against all four criteria.</p>";
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey
+      },
+      body: JSON.stringify({
+        model: "gpt-5.6",
+        input: prompt,
+        temperature: 0.2
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.error?.message || ("API request failed (" + response.status + ")"));
+    }
+
+    const text = (data.output || [])
+      .flatMap(item => item.content || [])
+      .filter(item => item.type === "output_text")
+      .map(item => item.text)
+      .join("")
+      .trim();
+
+    const cleaned = text.replace(/^```json\s*/i, "").replace(/\s*```$/i, "");
+    const grade = JSON.parse(cleaned);
+
+    result.innerHTML =
+      '<div class="ai-score">Estimated IELTS Writing Band: ' + grade.overall.toFixed(1) + '</div>' +
+      '<table><tr><th>Criterion</th><th>Band</th></tr>' +
+      '<tr><td>Task Achievement / Task Response</td><td>' + grade.task.toFixed(1) + '</td></tr>' +
+      '<tr><td>Coherence & Cohesion</td><td>' + grade.coherence.toFixed(1) + '</td></tr>' +
+      '<tr><td>Lexical Resource</td><td>' + grade.lexical.toFixed(1) + '</td></tr>' +
+      '<tr><td>Grammatical Range & Accuracy</td><td>' + grade.grammar.toFixed(1) + '</td></tr></table>' +
+      '<h4>Examiner summary</h4><p>' + grade.summary + '</p>' +
+      '<h4>Strengths</h4><ul>' + grade.strengths.map(x => '<li>' + x + '</li>').join("") + '</ul>' +
+      '<h4>Priorities</h4><ul>' + grade.priorities.map(x => '<li>' + x + '</li>').join("") + '</ul>' +
+      '<h4>Corrections</h4><ul>' +
+      grade.corrections.map(x => '<li><strong>' + x.original + '</strong> → <strong>' + x.better + '</strong> — ' + x.reason + '</li>').join("") +
+      '</ul>' +
+      '<h4>What is needed for Band 7?</h4><p>' + grade.band7 + '</p>' +
+      '<p class="small">AI assessment for practice only; this is not an official IELTS result.</p>';
+
+  } catch (err) {
+    result.innerHTML = '<h4>Could not grade the answer</h4><p>' + String(err.message).replace(/</g, "&lt;") + '</p>';
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
   const b = document.getElementById("gradeAnswer");
+  const keyBox = document.getElementById("apiKey");
+  const remember = document.getElementById("rememberKey");
+  const saved = localStorage.getItem("ielts_openai_key");
+  if (saved) { keyBox.value = saved; remember.checked = true; }
   if (b) b.addEventListener("click", gradeAnswer);
 });
 </script>
