@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Academic Writing Practice</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:1050px;margin:0 auto;padding:24px;line-height:1.5;background:#f5f6f8;color:#20242a}
+  h1,h2,h3{line-height:1.2}
+  .card{background:#fff;border-radius:12px;padding:20px;margin:18px 0;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+  .task{border-left:5px solid #555;padding-left:15px}
+  textarea{width:100%;min-height:280px;box-sizing:border-box;padding:14px;border:1px solid #bbb;border-radius:8px;font:16px/1.5 Arial;resize:vertical}
+  button{padding:10px 16px;border:0;border-radius:8px;background:#333;color:#fff;cursor:pointer;margin:5px 5px 5px 0}
+  button.secondary{background:#777}
+  .stats{display:flex;gap:20px;flex-wrap:wrap;margin:10px 0;font-weight:bold}
+  .stat{background:#eef0f3;padding:8px 12px;border-radius:8px}
+  .timer{font-size:28px;font-weight:bold;margin:10px 0}
+  .warning{color:#9b1c1c;font-weight:bold}
+  .tip{background:#f0f1f3;padding:12px;border-radius:8px}
+  .small{font-size:14px;color:#555}
+  @media(max-width:650px){body{padding:12px}.card{padding:15px}}
+
+.task-selector{margin:12px 0 18px}
+.task-selector select{width:100%;max-width:520px;padding:10px;border:1px solid #bbb;border-radius:8px;background:#fff;font-size:16px}
+.practice-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.task-panel,.answer-panel{min-width:0}
+.task-panel{border:1px solid #ccc;border-radius:10px;padding:18px;background:#fff}
+.answer-panel{position:relative}
+.answer-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.answer-header h3{margin:0}
+.answer-panel textarea{min-height:560px;height:calc(100vh - 360px);max-height:900px}
+.stats{margin-top:10px}
+.controls{margin-top:8px}
+.task-panel svg{display:block;width:100%;height:auto;margin:12px 0}
+@media(max-width:800px){
+  .practice-grid{grid-template-columns:1fr}
+  .answer-panel textarea{height:420px;max-height:none}
+}
+</style>
+</head>
+<body>
+<h1>IELTS Academic Writing Practice</h1>
+<p>Designed for intensive preparation for a <strong>Band 7.0 Writing target</strong>. Use the 20-minute limit for Task 1 and 40-minute limit for Task 2.</p>
+
+<div class="card">
+  <h2>How to use this page</h2>
+  <ol>
+    <li>Choose a task below.</li>
+    <li>Set the timer before starting.</li>
+    <li>Write without looking things up or using a translator.</li>
+    <li>Use the live word counter to check your length.</li>
+    <li>After finishing, review grammar, task response, paragraphing and vocabulary.</li>
+  </ol>
+  <div class="tip"><strong>Target:</strong> Task 1 = at least 150 words. Task 2 = at least 250 words. Aim for quality rather than simply writing more.</div>
+</div>
+
+<div class="card">
+<h2>Practice task</h2>
+
+<div class="task-selector">
+  <label for="taskSelect"><strong>Select a task:</strong></label>
+  <select id="taskSelect">
+    <optgroup label="Task 1 — Academic">
+      <option value="t1a">Task 1A — Line graph</option>
+      <option value="t1b">Task 1B — Bar chart</option>
+      <option value="t1c">Task 1C — Process</option>
+    </optgroup>
+    <optgroup label="Task 2 — Essay">
+      <option value="t2a">Task 2A — Technology and employment</option>
+      <option value="t2b">Task 2B — Education</option>
+      <option value="t2c">Task 2C — Remote work</option>
+      <option value="t2d">Task 2D — Environment</option>
+      <option value="t2e">Task 2E — Public money</option>
+      <option value="t2f">Task 2F — Children and technology</option>
+    </optgroup>
+  </select>
+</div>
+
+<div class="practice-grid">
+  <section class="task-panel" id="taskPanel">
+    
+<h3>Task 1B — Bar chart</h3>
+<p>The bar chart shows the average number of hours per week that adults in four age groups spent on exercise, watching television and using social media.</p>
+<svg viewBox="0 0 720 410" role="img" aria-label="Bar chart showing weekly hours spent on exercise, television and social media by age group">
+  <line x1="80" y1="330" x2="680" y2="330" stroke="currentColor"/>
+  <line x1="80" y1="35" x2="80" y2="330" stroke="currentColor"/>
+  <g stroke="currentColor" opacity=".15">
+    <line x1="80" y1="271" x2="680" y2="271"/><line x1="80" y1="212" x2="680" y2="212"/>
+    <line x1="80" y1="153" x2="680" y2="153"/><line x1="80" y1="94" x2="680" y2="94"/><line x1="80" y1="35" x2="680" y2="35"/>
+  </g>
+  <g fill="currentColor" opacity=".9">
+    <rect x="105" y="235.6" width="28" height="94.4"/><rect x="255" y="247.4" width="28" height="82.6"/>
+    <rect x="405" y="259.2" width="28" height="70.8"/><rect x="555" y="223.8" width="28" height="106.2"/>
+  </g>
+  <g fill="currentColor" opacity=".65">
+    <rect x="139" y="111.7" width="28" height="218.3"/><rect x="289" y="123.5" width="28" height="206.5"/>
+    <rect x="439" y="135.3" width="28" height="194.7"/><rect x="589" y="158.9" width="28" height="171.1"/>
+  </g>
+  <g fill="currentColor" opacity=".35">
+    <rect x="173" y="170.7" width="28" height="159.3"/><rect x="323" y="206.1" width="28" height="123.9"/>
+    <rect x="473" y="241.5" width="28" height="88.5"/><rect x="623" y="282.8" width="28" height="47.2"/>
+  </g>
+  <g font-size="13" fill="currentColor">
+    <text x="100" y="355">18–29</text><text x="250" y="355">30–44</text><text x="400" y="355">45–59</text><text x="550" y="355">60+</text>
+    <text x="445" y="20">Exercise</text><text x="520" y="20">TV</text><text x="570" y="20">Social media</text>
+  </g>
+</svg>
+<p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>
+
+  </section>
+
+  <section class="answer-panel">
+    <div class="answer-header">
+      <h3>Your answer</h3>
+      <div class="timer" id="timer">60:00</div>
+    </div>
+
+    <textarea id="essay" aria-label="Your IELTS answer" placeholder="Write your answer here..."></textarea>
+
+    <div class="stats">
+      <div class="stat"><strong>Words:</strong> <span id="words">0</span></div>
+      <div class="stat"><strong>Characters:</strong> <span id="chars">0</span></div>
+      <div class="stat"><strong>Paragraphs:</strong> <span id="paras">0</span></div>
+      <div class="stat"><strong>Minimum:</strong> <span id="minimum">150</span></div>
+    </div>
+
+    <p id="status" aria-live="polite" class="small"></p>
+
+    <div class="controls">
+      <button type="button" id="start60">Start 60 min</button>
+      <button type="button" id="startTask1">Task 1 — 20 min</button>
+      <button type="button" id="startTask2">Task 2 — 40 min</button>
+      <button type="button" class="secondary" id="pause">Pause</button>
+      <button type="button" class="secondary" id="reset">Reset</button>
+    </div>
+  </section>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Band 7 self-check</h2>
+<ul>
+<li><strong>Task Response:</strong> Did I answer every part of the question? Is my position clear throughout?</li>
+<li><strong>Development:</strong> Does every main idea have an explanation and a specific example or consequence?</li>
+<li><strong>Coherence:</strong> Can the reader follow my argument without effort?</li>
+<li><strong>Vocabulary:</strong> Is my vocabulary precise and natural rather than unnecessarily complicated?</li>
+<li><strong>Grammar:</strong> Do I use a mixture of simple and complex structures? Are many sentences completely error-free?</li>
+<li><strong>Accuracy:</strong> Did I check articles, plurals, verb endings, subject–verb agreement, prepositions and spelling?</li>
+</ul>
+</div>
+
+<script>
+(function () {
+  function ready(fn) {
+    if (document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  var tasks = {
+    t1a: {min:150, html:`<h3>Task 1A — Line graph</h3><p>The line graph shows the percentage of households in three countries that had access to the internet between 2005 and 2020.</p><p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>`},
+    t1b: {min:150, html:`
+<h3>Task 1B — Bar chart</h3>
+<p>The bar chart shows the average number of hours per week that adults in four age groups spent on exercise, watching television and using social media.</p>
+<svg viewBox="0 0 720 410" role="img" aria-label="Bar chart showing weekly hours spent on exercise, television and social media by age group">
+  <line x1="80" y1="330" x2="680" y2="330" stroke="currentColor"/>
+  <line x1="80" y1="35" x2="80" y2="330" stroke="currentColor"/>
+  <g stroke="currentColor" opacity=".15">
+    <line x1="80" y1="271" x2="680" y2="271"/><line x1="80" y1="212" x2="680" y2="212"/>
+    <line x1="80" y1="153" x2="680" y2="153"/><line x1="80" y1="94" x2="680" y2="94"/><line x1="80" y1="35" x2="680" y2="35"/>
+  </g>
+  <g fill="currentColor" opacity=".9">
+    <rect x="105" y="235.6" width="28" height="94.4"/><rect x="255" y="247.4" width="28" height="82.6"/>
+    <rect x="405" y="259.2" width="28" height="70.8"/><rect x="555" y="223.8" width="28" height="106.2"/>
+  </g>
+  <g fill="currentColor" opacity=".65">
+    <rect x="139" y="111.7" width="28" height="218.3"/><rect x="289" y="123.5" width="28" height="206.5"/>
+    <rect x="439" y="135.3" width="28" height="194.7"/><rect x="589" y="158.9" width="28" height="171.1"/>
+  </g>
+  <g fill="currentColor" opacity=".35">
+    <rect x="173" y="170.7" width="28" height="159.3"/><rect x="323" y="206.1" width="28" height="123.9"/>
+    <rect x="473" y="241.5" width="28" height="88.5"/><rect x="623" y="282.8" width="28" height="47.2"/>
+  </g>
+  <g font-size="13" fill="currentColor">
+    <text x="100" y="355">18–29</text><text x="250" y="355">30–44</text><text x="400" y="355">45–59</text><text x="550" y="355">60+</text>
+    <text x="445" y="20">Exercise</text><text x="520" y="20">TV</text><text x="570" y="20">Social media</text>
+  </g>
+</svg>
+<p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features, and make comparisons where relevant.</p>
+`},
+    t1c: {min:150, html:`<h3>Task 1C — Process diagram</h3><p>The diagram shows the stages involved in producing drinking water from seawater using a desalination plant.</p><p><strong>Write at least 150 words.</strong> Summarise the information by selecting and reporting the main features.</p>`},
+    t2a: {min:250, html:`<h3>Task 2A — Technology and employment</h3><p>Artificial intelligence and automation are expected to change the types of jobs available in the future.</p><p>Some people believe governments should provide financial support to people whose jobs disappear because of technology. Others believe individuals should be responsible for adapting to these changes.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`},
+    t2b: {min:250, html:`<h3>Task 2B — Education</h3><p>Some people believe that schools should focus mainly on academic subjects, while others think that practical skills such as financial management, communication and cooking are equally important.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`},
+    t2c: {min:250, html:`<h3>Task 2C — Remote work</h3><p>Working from home has become increasingly common. Some people believe this is beneficial for employees and employers, while others think it has more disadvantages than advantages.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`},
+    t2d: {min:250, html:`<h3>Task 2D — Environment</h3><p>Some people believe that individual actions such as recycling and reducing car use can significantly improve the environment. Others argue that environmental problems can only be solved effectively by governments and large companies.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`},
+    t2e: {min:250, html:`<h3>Task 2E — Public money</h3><p>Governments should spend more money on public transport rather than building new roads.</p><p><strong>To what extent do you agree or disagree?</strong></p>`},
+    t2f: {min:250, html:`<h3>Task 2F — Children and technology</h3><p>Children are spending increasing amounts of time using smartphones, tablets and computers.</p><p>Some people think parents should strictly control this use, while others believe children should learn to manage their own screen time.</p><p><strong>Discuss both views and give your own opinion.</strong></p>`}
+  };
+
+  var timer = null, seconds = 3600;
+
+  function count() {
+    var box = document.getElementById("essay");
+    if (!box) return;
+    var text = box.value.trim();
+    var words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+    document.getElementById("words").textContent = words;
+    document.getElementById("chars").textContent = box.value.length;
+    document.getElementById("paras").textContent = text ? text.split(/\n\s*\n/).filter(Boolean).length : 0;
+    var min = Number(document.getElementById("minimum").textContent);
+    var status = document.getElementById("status");
+    status.textContent = words >= min ? "✓ Minimum word count reached." : "Below the recommended minimum.";
+    status.className = words >= min ? "small" : "small warning";
+  }
+
+  function showTask() {
+    var id = document.getElementById("taskSelect").value;
+    if (!tasks[id]) return;
+    document.getElementById("taskPanel").innerHTML = tasks[id].html;
+    document.getElementById("minimum").textContent = tasks[id].min;
+    count();
+  }
+
+  function render() {
+    var m = String(Math.floor(seconds / 60)).padStart(2,"0");
+    var s = String(seconds % 60).padStart(2,"0");
+    document.getElementById("timer").textContent = m + ":" + s;
+  }
+
+  function start(n) {
+    clearInterval(timer);
+    seconds = n;
+    render();
+    timer = setInterval(function() {
+      if (seconds <= 0) { clearInterval(timer); timer = null; alert("Time is up."); return; }
+      seconds--;
+      render();
+    },1000);
+  }
+
+  ready(function() {
+    var box = document.getElementById("essay");
+    box.addEventListener("input", count);
+    box.addEventListener("keyup", count);
+    document.getElementById("taskSelect").addEventListener("change", showTask);
+    document.getElementById("start60").addEventListener("click", function(){start(3600);});
+    document.getElementById("startTask1").addEventListener("click", function(){start(1200);});
+    document.getElementById("startTask2").addEventListener("click", function(){start(2400);});
+    document.getElementById("pause").addEventListener("click", function(){clearInterval(timer);timer=null;});
+    document.getElementById("reset").addEventListener("click", function(){clearInterval(timer);timer=null;seconds=3600;render();});
+    showTask();
+    render();
+    count();
+  });
+})();
+</script>
+</body>
+</html>
