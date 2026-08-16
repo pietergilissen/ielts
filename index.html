@@ -36,6 +36,11 @@
   .practice-grid{grid-template-columns:1fr}
   .answer-panel textarea{height:420px;max-height:none}
 }
+
+.grading-area{margin-top:16px;padding-top:14px;border-top:1px solid #ddd}
+.grade-button{font-weight:700}
+.grading-result{margin-top:12px;padding:14px;border:1px solid #ddd;border-radius:10px;background:#fff}
+.grade-score{font-size:1.35rem;font-weight:700;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -134,6 +139,11 @@
       <button type="button" id="startTask2">Task 2 — 40 min</button>
       <button type="button" class="secondary" id="pause">Pause</button>
       <button type="button" class="secondary" id="reset">Reset</button>
+    </div>
+    <div class="grading-area">
+      <button type="button" id="gradeAnswer" class="grade-button">Grade my answer</button>
+      <p class="small">Practice estimate based on IELTS-style checks. It is not an official IELTS score.</p>
+      <div id="gradingResult" class="grading-result" aria-live="polite" hidden></div>
     </div>
   </section>
 </div>
@@ -248,6 +258,78 @@
     init();
   }
 })();
+
+function gradeAnswer() {
+  const box = document.getElementById("essay");
+  const result = document.getElementById("gradingResult");
+  const text = box.value.trim();
+  const min = Number(document.getElementById("minimum").textContent);
+  const taskId = document.getElementById("taskSelect").value;
+
+  if (!text) {
+    result.hidden = false;
+    result.innerHTML = "<h4>Nothing to grade yet</h4><p>Write your answer first.</p>";
+    return;
+  }
+
+  const words = text.split(/\s+/).filter(Boolean).length;
+  const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+  const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  const lower = text.toLowerCase();
+
+  const linking = (lower.match(/\b(overall|however|whereas|while|although|in contrast|similarly|on the other hand|therefore|as a result|in addition|moreover|firstly|secondly)\b/g) || []).length;
+  const comparisons = (lower.match(/\b(higher|lower|increase|increased|decrease|decreased|rose|fell|compared|respectively|percentage points|more than|less than|similar|difference)\b/g) || []).length;
+  const dataWords = (lower.match(/\b\d+(?:\.\d+)?%?\b/g) || []).length;
+  const longSentences = sentences.filter(s => s.split(/\s+/).length > 30).length;
+
+  let score = 5.0;
+  const strengths = [];
+  const improvements = [];
+
+  if (words >= min) { score += .45; strengths.push("You reached the minimum word count."); }
+  else improvements.push("Reach at least " + min + " words.");
+
+  if (paragraphs >= 3) { score += .25; strengths.push("The response is divided into paragraphs."); }
+  else improvements.push("Use clear paragraphs with a logical progression.");
+
+  if (linking >= 3) { score += .25; strengths.push("You use several linking expressions."); }
+  else improvements.push("Use a wider range of natural linking and comparison expressions.");
+
+  if (comparisons >= 4) { score += .25; strengths.push("You use useful comparison/trend vocabulary."); }
+  else improvements.push("Make more direct comparisons between the key points.");
+
+  if (taskId.startsWith("t1") && dataWords >= 4) { score += .25; strengths.push("You report several figures from the visual."); }
+  if (taskId.startsWith("t1") && dataWords < 4) improvements.push("Support your overview with more specific figures from the visual.");
+
+  if (longSentences >= Math.max(2, Math.floor(sentences.length / 3)))
+    improvements.push("Some sentences are very long; split them to improve clarity and grammatical control.");
+
+  score = Math.min(7, Math.max(4, Math.round(score * 2) / 2));
+
+  const note = score >= 7
+    ? "These checks suggest potential Band 7 level, but detailed language accuracy still needs examiner-style assessment."
+    : score >= 6.5
+    ? "This is around Band 6.5 on these checks. Precision and grammatical accuracy are the main route to Band 7."
+    : score >= 6
+    ? "This is around Band 6 on these checks. Focus on accuracy, development and precise comparisons."
+    : "Focus first on task completion, structure and accurate language.";
+
+  result.hidden = false;
+  result.innerHTML =
+    '<div class="grade-score">Practice estimate: Band ' + score.toFixed(1) + '</div>' +
+    '<p>' + note + '</p>' +
+    '<p><strong>Strengths</strong></p><ul>' +
+    (strengths.length ? strengths.map(x => '<li>' + x + '</li>').join("") : '<li>Keep developing the response.</li>') +
+    '</ul><p><strong>Priorities</strong></p><ul>' +
+    (improvements.length ? improvements.map(x => '<li>' + x + '</li>').join("") : '<li>Continue refining precision and natural expression.</li>') +
+    '</ul>' +
+    '<p class="small"><strong>Important:</strong> this is a rule-based practice estimate, not an AI examiner or official IELTS assessment.</p>';
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const b = document.getElementById("gradeAnswer");
+  if (b) b.addEventListener("click", gradeAnswer);
+});
 </script>
 </body>
 </html>
