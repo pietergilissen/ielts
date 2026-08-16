@@ -282,7 +282,6 @@ async function gradeAnswer() {
   const keyBox = document.getElementById("apiKey");
   const remember = document.getElementById("rememberKey");
   const taskId = document.getElementById("taskSelect").value;
-  const task = tasks[taskId];
   const answer = box.value.trim();
 
   if (!answer) {
@@ -359,8 +358,7 @@ ${answer}
       },
       body: JSON.stringify({
         model: "gpt-5.6",
-        input: prompt,
-        temperature: 0.2
+        input: prompt
       })
     });
 
@@ -370,12 +368,11 @@ ${answer}
       throw new Error(data?.error?.message || ("API request failed (" + response.status + ")"));
     }
 
-    const text = (data.output || [])
+    const text = (data.output_text || (data.output || [])
       .flatMap(item => item.content || [])
       .filter(item => item.type === "output_text")
       .map(item => item.text)
-      .join("")
-      .trim();
+      .join("")).trim();
 
     const cleaned = text.replace(/^```json\s*/i, "").replace(/\s*```$/i, "");
     const grade = JSON.parse(cleaned);
@@ -397,7 +394,7 @@ ${answer}
       '<p class="small">AI assessment for practice only; this is not an official IELTS result.</p>';
 
   } catch (err) {
-    result.innerHTML = '<h4>Could not grade the answer</h4><p>' + String(err.message).replace(/</g, "&lt;") + '</p>';
+    result.innerHTML = '<h4>Could not grade the answer</h4><p>' + String(err.message).replace(/</g, "&lt;") + '</p><p class="small">If this says Failed to fetch, check that the page is being opened from GitHub Pages (https://pietergilissen.github.io/ielts/) rather than the local HTML preview.</p>';
   }
 }
 
