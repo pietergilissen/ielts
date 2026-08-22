@@ -18,152 +18,149 @@ function count(n){let b=document.getElementById('essay'+n),t=b.value.trim(),w=t?
 function tab(n){currentTab=n;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',+b.dataset.tab===n));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='pane'+n));render(n,currentTask[n]);count(n);document.getElementById('gradingResult').hidden=true}
 function timerRender(){document.getElementById('timer').textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`}function start(d){clearInterval(timer);seconds=d;timerRender();timer=setInterval(()=>{if(seconds<=0){clearInterval(timer);timer=null;alert('Time is up.');return}seconds--;timerRender()},1000)}
 function band(x){return Math.max(4,Math.min(9,Math.round(x*2)/2))}function score(n){
-  let t=document.getElementById('essay'+n).value.trim();
-  let r=document.getElementById('gradingResult');
-  let task=currentTask[n];
-  if(!t){
-    r.hidden=false;
-    r.innerHTML='<h4>Nothing to check yet</h4><p>Write your answer first.</p>';
+  let t = document.getElementById("essay" + n).value.trim();
+  let r = document.getElementById("gradingResult");
+  let task = currentTask[n];
+
+  if (!t) {
+    r.hidden = false;
+    r.innerHTML = "<h4>Nothing to check yet</h4><p>Write your answer first.</p>";
     return;
   }
 
-  let wds=t.split(/\s+/).filter(Boolean),wc=wds.length;
+  let words = t.match(/\b[A-Za-z0-9'-]+\b/g) || [];
+  let wc = words.length;
 
-  // Very short responses cannot demonstrate the IELTS Writing criteria.
-  // This fixes the old behaviour where even one word received a Band 5-ish score.
-  if(wc<40){
-    r.hidden=false;
-    r.innerHTML='<div class="grade-score">Insufficient response</div><p><strong>'+wc+' words</strong> is too short to demonstrate the IELTS Writing criteria.</p><p>The practice checker will not assign a normal IELTS band to such a response.</p>';
+  if (wc < 40) {
+    r.hidden = false;
+    r.innerHTML = `
+      <div class="grade-score">Insufficient Response</div>
+      <p><strong>${wc} words</strong> is too short to demonstrate the IELTS Writing criteria.</p>
+      <p class="small">Write at least ${task.min} words to receive a full assessment.</p>
+    `;
     return;
   }
 
-  let l=t.toLowerCase(),
-      sent=t.split(/[.!?]+/).map(s=>s.trim()).filter(Boolean),
-      ps=t.split(/\n\s*\n/).filter(Boolean),
-      link=(l.match(/\b(overall|however|whereas|while|although|in contrast|similarly|on the other hand|therefore|as a result|in addition|moreover|consequently|for example|for instance|nevertheless|furthermore|in conclusion|to conclude)\b/g)||[]).length,
-      comp=(l.match(/\b(higher|lower|increase|increased|decrease|decreased|rose|rising|fell|falling|compared|respectively|difference|similar|whereas|while|more than|less than|remained|peak|decline|fluctuat)\w*\b/g)||[]).length,
-      nums=(l.match(/\b\d+(?:\.\d+)?%?\b/g)||[]).length,
-      cx=(l.match(/\b(although|because|while|whereas|which|who|if|unless|despite|even though|in order to|so that|rather than|provided that)\b/g)||[]).length,
-      ex=(l.match(/\b(for example|for instance|such as)\b/g)||[]).length,
-      stance=(l.match(/\b(i believe|i agree|i disagree|in my opinion|i strongly|i would argue|i think|i support|i oppose|my view)\b/g)||[]).length;
+  let lower = t.toLowerCase();
+  let paragraphs = t.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  let sentences = t.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
 
-  const errorPatterns=[
-    /\bmore then\b/i,/\ban higher\b/i,/\bcome in touch\b/i,
-    /\bdifferent than\b/i,/\bphoto's\b/i,/\bpeoples\b/i,
-    /\bchildrens\b/i,/\binformations\b/i,/\badvices\b/i,
-    /\bdiscuss about\b/i,/\bresponsible to\b/i,
-    /\bit (?:experience|decline|increase|decrease|rise)\b/i,
-    /\b(?:student are|students is|government are|governments is)\b/i
+  // 1. Task Achievement / Task Response (TR / TA)
+  let tr = 5.0;
+  if (wc >= task.min) tr += 1.0;
+  else if (wc >= task.min * 0.8) tr += 0.5;
+
+  let hasOverview = /\b(overall|in summary|to summarise|to summarize|in general|overall trend|general pattern)\b/i.test(lower);
+  let hasComparisons = /\b(higher|lower|more than|less than|compared to|in comparison|as opposed to|whereas|while|doubled|tripled|peaked at|lowest|highest|fell to|rose to)\b/i.test(lower);
+  let hasData = /\b\d+(\.\d+)?%?|\b(percent|percentage|million|billion|thousand|hours|litres|gigawatts|years)\b/i.test(lower);
+  
+  let hasPosition = /\b(i believe|i argue|in my view|in my opinion|this essay (argues|believes|maintains)|it is argued that|i agree|i disagree|my view)\b/i.test(lower);
+  let hasExamples = /\b(for example|for instance|such as|to illustrate|a clear example|namely)\b/i.test(lower);
+  let hasConclusion = /\b(in conclusion|to conclude|to sum up|overall)\b/i.test(lower);
+
+  if (task.type === 't1') {
+    if (hasOverview) tr += 1.0;
+    if (hasComparisons) tr += 0.5;
+    if (hasData) tr += 0.5;
+  } else {
+    if (hasPosition) tr += 0.8;
+    if (hasExamples) tr += 0.6;
+    if (hasConclusion) tr += 0.6;
+  }
+  if (paragraphs.length >= 3 && paragraphs.length <= 5) tr += 0.5;
+
+  // 2. Coherence and Cohesion (CC)
+  let cc = 5.0;
+  let cohesiveDevices = lower.match(/\b(however|furthermore|moreover|in addition|on the other hand|consequently|therefore|as a result|despite|although|nevertheless|similarly|in contrast|firstly|secondly|finally|subsequently|meanwhile|specifically|conversely)\b/gi) || [];
+  let uniqueCohesive = new Set(cohesiveDevices.map(d => d.toLowerCase())).size;
+
+  if (paragraphs.length >= 3 && paragraphs.length <= 5) cc += 0.8;
+  if (uniqueCohesive >= 4) cc += 0.8;
+  else if (uniqueCohesive >= 2) cc += 0.4;
+  if (sentences.length >= 8 && (wc / Math.max(1, sentences.length)) >= 12 && (wc / Math.max(1, sentences.length)) <= 28) cc += 0.8;
+
+  // 3. Lexical Resource (LR)
+  let lr = 5.0;
+  let academicLexicon = [
+    'significant','significantly','substantial','substantially','dramatic','dramatically','noticeable','considerable',
+    'fluctuation','fluctuated','trend','proportion','percentage','trajectory','plateau','surpassed','counterpart',
+    'demonstrates','illustrates','depicts','indicates','reveals','consequently','furthermore','predominantly',
+    'predominant','beneficial','detrimental','advantageous','implication','perspective','fundamental','vital',
+    'crucial','imperative','phenomenon','prevalent','comprehensive','infrastructure','sustainability','productivity'
   ];
-  let err=errorPatterns.reduce((a,p)=>a+(p.test(t)?1:0),0);
+  let academicCount = academicLexicon.filter(w => lower.includes(w)).length;
+  let uniqueWords = new Set(words.map(w => w.toLowerCase())).size;
+  let lexicalDiversity = uniqueWords / Math.max(1, wc);
 
-  let cleaned=wds.map(x=>x.toLowerCase().replace(/[^a-z']/g,'')).filter(Boolean),
-      uniq=new Set(cleaned).size,
-      ratio=uniq/Math.max(1,wc),
-      longRatio=cleaned.filter(x=>x.length>=8).length/Math.max(1,wc),
-      avgSentence=wc/Math.max(1,sent.length),
-      lengths=sent.map(s=>s.split(/\s+/).length),
-      sentenceRange=lengths.length>2?Math.max(...lengths)-Math.min(...lengths):0;
+  if (lexicalDiversity > 0.45) lr += 0.7;
+  if (academicCount >= 6) lr += 1.2;
+  else if (academicCount >= 3) lr += 0.6;
 
-  let band=x=>Math.max(0,Math.min(9,Math.round(x*2)/2)),
-      min=task.min;
+  // 4. Grammatical Range and Accuracy (GRA)
+  let gra = 5.0;
+  let complexMarkers = lower.match(/\b(although|even though|whereas|while|because|since|unless|provided that|in order that|which|whose|whom|despite the fact that|if|having been)\b/gi) || [];
+  let passiveMarkers = lower.match(/\b(is|are|was|were|been|being)\s+([a-z]+ed|[a-z]+en)\b/gi) || [];
 
-  // Task Achievement / Task Response
-  let tr=4.0;
-  if(wc>=min) tr+=1.0;
-  if(wc>=(task.type==='t1'?180:280)) tr+=.3;
-  if(ps.length>=3) tr+=.25;
+  if (complexMarkers.length >= 4) gra += 0.8;
+  else if (complexMarkers.length >= 2) gra += 0.4;
 
-  if(task.type==='t1'){
-    if(l.includes('overall')) tr+=.55;
-    if(comp>=3) tr+=.4;
-    if(nums>=4) tr+=.35;
-    if(nums>=8) tr+=.15;
-    if(task.kind==='process'&&/first|second|third|finally|stage|process|then|after/i.test(t)) tr+=.45;
-  }else{
-    if(stance>=1) tr+=.55;
-    if(ex>=1) tr+=.35;
-    if(cx>=3) tr+=.25;
-    if(/\b(in conclusion|to conclude)\b/.test(l)) tr+=.25;
-    if(wc>=250&&sent.length>=10) tr+=.25;
-    if(ps.length>=4) tr+=.3;
-  }
-  tr-=err*.12;
+  if (passiveMarkers && passiveMarkers.length >= 3) gra += 0.6;
 
-  // Coherence & Cohesion
-  let co=4.1;
-  if(wc>=min) co+=.65;
-  if(ps.length>=3) co+=.4;
-  if(task.type==='t2'&&ps.length>=4) co+=.3;
-  if(link>=3) co+=.45;
-  if(link>=6) co+=.2;
-  if(sent.length>=8) co+=.25;
-  if(sentenceRange>=15) co+=.15;
-  if(avgSentence>=12&&avgSentence<=30) co+=.2;
-  if(lengths.some(x=>x>45)) co-=.3;
+  // Genuine high-frequency grammatical checks
+  let realGrammarMistakes = [
+    /\b(much|less)\s+(people|students|children|cars|items)\b/i,
+    /\b(student|government|country)\s+(are|were)\b/i,
+    /\b(students|governments|countries)\s+(is|was)\b/i,
+    /\ba\s+[aeiou][a-z]+/i,
+    /\ban\s+[bcdfghjklmnpqrstvwxyz][a-z]+/i
+  ];
+  let mistakeCount = realGrammarMistakes.reduce((acc, reg) => acc + (reg.test(t) ? 1 : 0), 0);
+  gra -= (mistakeCount * 0.4);
 
-  // Lexical Resource
-  // Vocabulary should not be judged mainly by a crude unique-word ratio.
-  // Strong IELTS writing naturally repeats key topic words. We therefore
-  // combine lexical variety, longer/academic vocabulary and repetition control.
-  const advancedWords = /\b(development|significant|increasingly|beneficial|advantage|disadvantage|communication|relationships|superficial|non[- ]?verbal|encounter|individuals|platforms|initiate|consequently|nevertheless|moreover|therefore|productivity|flexibility|management|financial|education|environment|government|society|technology|automation|employment|economic|cultural|effective|substantial|considerable|essential|crucial|predominantly|approximately|proportion|percentage|fluctuation|decline|distribution|consumption|process|illustrates|demonstrates|comparison|respectively)\b/gi;
-  const advancedCount=(t.match(advancedWords)||[]).length;
-  let le=4.5;
-  if(wc>=min) le+=.7;
-  if(ratio>=.48) le+=.35;
-  if(ratio>=.55) le+=.3;
-  if(longRatio>=.10) le+=.25;
-  if(longRatio>=.16) le+=.25;
-  if(advancedCount>=4) le+=.35;
-  if(advancedCount>=8) le+=.25;
-  if(err>=2) le-=.3;
-  if(err>=4) le-=.35;
-
-  // Grammatical Range & Accuracy
-  let gr=4.0;
-  if(wc>=min) gr+=.55;
-  if(sent.length>=8) gr+=.25;
-  if(sent.length>=12) gr+=.15;
-  if(cx>=3) gr+=.4;
-  if(cx>=6) gr+=.25;
-  if(cx>=10) gr+=.1;
-  if(sentenceRange>=15) gr+=.15;
-  if(avgSentence>=12&&avgSentence<=30) gr+=.15;
-  if(err===0) gr+=.75;
-  else gr-=Math.min(1.0,err*.2);
-
-  // Calibration for a genuinely strong complete response. This is deliberately
-  // based on several independent signals rather than word count alone.
-  const strongT2 = task.type==='t2' && wc>=280 && ps.length>=4 && sent.length>=12 &&
-                   err===0 && stance>=1 && cx>=4 && ex>=1 && linking>=3 && ratio>=.48;
-  const strongT1 = task.type==='t1' && wc>=180 && ps.length>=4 && sent.length>=10 &&
-                   err===0 && l.includes('overall') && comp>=3 && numbers>=4 && ratio>=.48;
-  if(strongT2 || strongT1){
-    tr+=.65; co+=.55; le+=.55; gr+=.6;
+  // Normalise and round to IELTS half-bands (1.0 - 9.0)
+  function roundBand(val) {
+    let clamped = Math.max(4.0, Math.min(9.0, val));
+    return Math.round(clamped * 2) / 2;
   }
 
-  tr=band(tr);co=band(co);le=band(le);gr=band(gr);
-  let ov=band((tr+co+le+gr)/4),pr=[];
+  let finalTR = roundBand(tr);
+  let finalCC = roundBand(cc);
+  let finalLR = roundBand(lr);
+  let finalGRA = roundBand(gra);
+  let overall = roundBand((finalTR + finalCC + finalLR + finalGRA) / 4);
 
-  if(wc<min) pr.push(`Reach at least ${min} words.`);
-  if(task.type==='t1'&&!l.includes('overall')) pr.push('Add a clear overview of the main trends or features.');
-  if(task.type==='t1'&&comp<3) pr.push('Make more direct comparisons between key figures or stages.');
-  if(task.type==='t2'&&!stance) pr.push('State your position clearly and maintain it throughout.');
-  if(task.type==='t2'&&!ex) pr.push('Support main ideas with a specific example or consequence.');
-  if(ps.length<(task.type==='t2'?4:3)) pr.push('Use clearer paragraphing.');
-  if(err) pr.push('Proofread recurring grammar and word-choice errors.');
-  if(!pr.length) pr.push('Keep refining precision and grammatical control.');
+  // Actionable feedback priorities
+  let priorities = [];
+  if (wc < task.min) priorities.push(`Expand word count: aim for at least ${task.min} words (currently ${wc}).`);
+  if (paragraphs.length < 3) priorities.push("Improve paragraphing: structure response into 3–5 distinct paragraphs.");
+  if (task.type === 't1' && !hasOverview) priorities.push("Add an explicit Overview paragraph summarizing overall trends or key features.");
+  if (task.type === 't2' && !hasPosition) priorities.push("State your position clearly in the introduction and reiterate it in the conclusion.");
+  if (uniqueCohesive < 3) priorities.push("Use a broader range of linking words (e.g., 'Consequently', 'In contrast', 'Furthermore').");
+  if (academicCount < 4) priorities.push("Incorporate more topic-specific academic vocabulary and collocations.");
+  if (complexMarkers.length < 3) priorities.push("Use more complex and compound sentences (relative clauses, conditional statements, subordinating conjunctions).");
+  if (!priorities.length) priorities.push("Solid execution! Focus on subtle lexical precision and eliminating minor punctuation slips.");
 
-  r.hidden=false;
-  r.innerHTML=`<div class="grade-score">Practice estimate: Band ${ov.toFixed(1)}</div>
-  <p><strong>${wc} words</strong> · ${sent.length} sentences · ${ps.length} paragraphs</p>
-  <table><tr><th>IELTS criterion</th><th>Estimated band</th></tr>
-  <tr><td>${task.type==='t1'?'Task Achievement':'Task Response'}</td><td>${tr.toFixed(1)}</td></tr>
-  <tr><td>Coherence &amp; Cohesion</td><td>${co.toFixed(1)}</td></tr>
-  <tr><td>Lexical Resource</td><td>${le.toFixed(1)}</td></tr>
-  <tr><td>Grammatical Range &amp; Accuracy</td><td>${gr.toFixed(1)}</td></tr></table>
-  <p><strong>Priorities</strong></p><ul>${pr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
-  <p class="small"><strong>Important:</strong> Basic practice estimate only; not an official IELTS score.</p>`;
+  r.hidden = false;
+  r.innerHTML = `
+    <div class="grade-score">Estimated Band: ${overall.toFixed(1)}</div>
+    <p><strong>${wc} words</strong> | ${sentences.length} sentences | ${paragraphs.length} paragraphs</p>
+    <table>
+      <thead>
+        <tr><th>Criterion</th><th>Estimated Band</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>${task.type === 't1' ? 'Task Achievement' : 'Task Response'}</td><td>${finalTR.toFixed(1)}</td></tr>
+        <tr><td>Coherence &amp; Cohesion</td><td>${finalCC.toFixed(1)}</td></tr>
+        <tr><td>Lexical Resource</td><td>${finalLR.toFixed(1)}</td></tr>
+        <tr><td>Grammatical Range &amp; Accuracy</td><td>${finalGRA.toFixed(1)}</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Feedback &amp; Key Priorities</strong></p>
+    <ul>
+      ${priorities.map(p => `<li>${p}</li>`).join('')}
+    </ul>
+    <p class="small"><strong>Note:</strong> Automated rule-based estimate intended for practice guidance.</p>
+  `;
 }
 function randomTask(n){let pool=n===1?TASK1:TASK2,t=pool[Math.floor(Math.random()*pool.length)];document.getElementById('essay'+n).value='';render(n,t);count(n);tab(n)}function choose(n){let pool=n===1?TASK1:TASK2,x=prompt(`Enter the number of the ${n===1?'Task 1':'Task 2'} you want (1-${pool.length}):`);if(x===null)return;let i=+x-1;if(Number.isInteger(i)&&pool[i]){render(n,pool[i]);tab(n)}else alert('Please enter a valid number.')}function init(){currentTask[1]=TASK1[Math.floor(Math.random()*TASK1.length)];currentTask[2]=TASK2[Math.floor(Math.random()*TASK2.length)];render(1,currentTask[1]);render(2,currentTask[2]);tab(1);['1','2'].forEach(n=>document.getElementById('essay'+n).addEventListener('input',()=>count(+n)));document.getElementById('tabTask1').onclick=()=>tab(1);document.getElementById('tabTask2').onclick=()=>tab(2);document.getElementById('randomTask1').onclick=()=>randomTask(1);document.getElementById('randomTask2').onclick=()=>randomTask(2);document.getElementById('selectTask1').onclick=()=>choose(1);document.getElementById('selectTask2').onclick=()=>choose(2);document.getElementById('gradeAnswer1').onclick=()=>score(1);document.getElementById('gradeAnswer2').onclick=()=>score(2);document.getElementById('start60').onclick=()=>start(3600);document.getElementById('startTask1').onclick=()=>start(1200);document.getElementById('startTask2').onclick=()=>start(2400);document.getElementById('pause').onclick=()=>{clearInterval(timer);timer=null};document.getElementById('reset').onclick=()=>{clearInterval(timer);timer=null;seconds=3600;timerRender()};timerRender();count(1);count(2)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()})();
 </script></body></html>
