@@ -103,14 +103,21 @@ function band(x){return Math.max(4,Math.min(9,Math.round(x*2)/2))}function score
   if(lengths.some(x=>x>45)) co-=.3;
 
   // Lexical Resource
-  let le=4.1;
-  if(wc>=min) le+=.55;
-  if(ratio>=.50) le+=.35;
-  else if(ratio>=.45) le+=.2;
-  if(longRatio>=.12) le+=.25;
-  if(longRatio>=.18) le+=.2;
-  if(err>=2) le-=.25;
-  if(err>=4) le-=.25;
+  // Vocabulary should not be judged mainly by a crude unique-word ratio.
+  // Strong IELTS writing naturally repeats key topic words. We therefore
+  // combine lexical variety, longer/academic vocabulary and repetition control.
+  const advancedWords = /\b(development|significant|increasingly|beneficial|advantage|disadvantage|communication|relationships|superficial|non[- ]?verbal|encounter|individuals|platforms|initiate|consequently|nevertheless|moreover|therefore|productivity|flexibility|management|financial|education|environment|government|society|technology|automation|employment|economic|cultural|effective|substantial|considerable|essential|crucial|predominantly|approximately|proportion|percentage|fluctuation|decline|distribution|consumption|process|illustrates|demonstrates|comparison|respectively)\b/gi;
+  const advancedCount=(t.match(advancedWords)||[]).length;
+  let le=4.5;
+  if(wc>=min) le+=.7;
+  if(ratio>=.48) le+=.35;
+  if(ratio>=.55) le+=.3;
+  if(longRatio>=.10) le+=.25;
+  if(longRatio>=.16) le+=.25;
+  if(advancedCount>=4) le+=.35;
+  if(advancedCount>=8) le+=.25;
+  if(err>=2) le-=.3;
+  if(err>=4) le-=.35;
 
   // Grammatical Range & Accuracy
   let gr=4.0;
@@ -125,9 +132,14 @@ function band(x){return Math.max(4,Math.min(9,Math.round(x*2)/2))}function score
   if(err===0) gr+=.75;
   else gr-=Math.min(1.0,err*.2);
 
-  // Strong complete responses can enter the upper bands.
-  if(wc>=280&&ps.length>=4&&sent.length>=12&&err===0){
-    tr+=.35; co+=.3; le+=.35; gr+=.4;
+  // Calibration for a genuinely strong complete response. This is deliberately
+  // based on several independent signals rather than word count alone.
+  const strongT2 = task.type==='t2' && wc>=280 && ps.length>=4 && sent.length>=12 &&
+                   err===0 && stance>=1 && cx>=4 && ex>=1 && linking>=3 && ratio>=.48;
+  const strongT1 = task.type==='t1' && wc>=180 && ps.length>=4 && sent.length>=10 &&
+                   err===0 && l.includes('overall') && comp>=3 && numbers>=4 && ratio>=.48;
+  if(strongT2 || strongT1){
+    tr+=.65; co+=.55; le+=.55; gr+=.6;
   }
 
   tr=band(tr);co=band(co);le=band(le);gr=band(gr);
